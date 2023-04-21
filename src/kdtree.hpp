@@ -3,10 +3,11 @@
 using namespace std;
 typedef vector<double> Point;
 
-struct MBR
+struct HRect
 {
     vector<double> mins;
-    vector<double> max;
+    vector<double> maxs;
+    HRect(Point p1, Point p2, int dim);
 };
 
 class KDTree
@@ -17,8 +18,8 @@ private:
     int leaf_size;
     Point median;
     vector<Point> points;
-    KDTree* left;
-    KDTree* right;
+    KDTree *left;
+    KDTree *right;
 
 public:
     // The constructor for root node
@@ -27,5 +28,5 @@ public:
     ~KDTree();
     void split(int cur_dim);
     void insert(Point p);
-    vector<Point> range_query(MBR mbr);
+    vector<Point> range_query(HRect& rect);
 };
