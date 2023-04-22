@@ -1,3 +1,6 @@
+#ifndef KD_TREE_HPP
+#define KD_TREE_HPP
+
 #include <vector>
 
 using namespace std;
@@ -29,4 +32,7 @@ public:
     void split(int cur_dim);
     void insert(Point p);
     vector<Point> range_query(HRect& rect);
+    Point point_query(Point& p);
 };
+
+#endif

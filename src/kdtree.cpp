@@ -53,6 +53,21 @@ bool is_include(const HRect &r, Point p)
     return result;
 }
 
+bool is_equal(Point& p1, Point& p2)
+{
+    bool result = true;
+    int dim = p1.size();
+    for (int i = 0; i < dim; i++)
+    {
+        if(p1[i] != p2[i])
+        {
+            result = false;
+            break;
+        }
+    }
+    return result;
+}
+
 KDTree::KDTree(int n_dim, int n_leaf, vector<Point> ps)
 {
     dim = n_dim;
@@ -61,12 +76,6 @@ KDTree::KDTree(int n_dim, int n_leaf, vector<Point> ps)
     left = nullptr;
     right = nullptr;
     points = ps;
-
-    sort(points.begin(), points.end(),
-         [](Point a, Point b)
-         { return (a[0] < b[0]); });
-    int m = points.size() / 2;
-    median = points[m];
 
     if (points.size() > leaf_size)
     {
@@ -82,12 +91,6 @@ KDTree::KDTree(int n_dim, int c_dim, int n_leaf, vector<Point> ps)
     left = nullptr;
     right = nullptr;
     points = ps;
-
-    sort(points.begin(), points.end(),
-         [c_dim](Point a, Point b)
-         { return (a[c_dim] < b[c_dim]); });
-    int m = points.size() / 2;
-    median = points[m];
 
     if (points.size() > leaf_size)
     {
@@ -145,17 +148,15 @@ vector<Point> KDTree::range_query(HRect &rect)
     vector<Point> ps;
     if (!is_leaf)
     {
-        HRect lrect = HRect(median, this->left->median, dim);
-        HRect rrect = HRect(median, this->right->median, dim);
-        if (interact(rect, lrect))
+        if (rect.mins[cur_dim] <= median[cur_dim])
         {
-            vector<Point> lpoints = this->left->range_query(rect);
+            vector<Point> lpoints = left->range_query(rect);
             ps.insert(ps.end(), lpoints.begin(), lpoints.end());
         }
 
-        if (interact(rect, lrect))
+        if (rect.maxs[cur_dim] >= median[cur_dim])
         {
-            vector<Point> rpoints = this->right->range_query(rect);
+            vector<Point> rpoints = right->range_query(rect);
             ps.insert(ps.end(), rpoints.begin(), rpoints.end());
         }
     }
@@ -170,4 +171,32 @@ vector<Point> KDTree::range_query(HRect &rect)
         }
     }
     return ps;
+}
+
+Point KDTree::point_query(Point& p) 
+{
+    bool is_leaf = (left == nullptr) && (right == nullptr);
+    Point result;
+
+    if (!is_leaf)
+    {
+        if (p[cur_dim] <= median[cur_dim])
+        {
+            result = left->point_query(p);
+        }
+
+        if (p[cur_dim] >= median[cur_dim])
+        {
+            result = right->point_query(p);
+        }
+    }
+    else
+    {
+        for (auto op : points)
+        {
+            if(is_equal(p, op))
+                return op;
+        }
+    }
+    return result;
 }
