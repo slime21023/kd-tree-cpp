@@ -23,13 +23,13 @@ private:
     vector<Point> points;
     KDTree *left;
     KDTree *right;
+    void split(int cur_dim);
 
 public:
     // The constructor for root node
     KDTree(int n_dim, int n_leaf, vector<Point> ps);
     KDTree(int n_dim, int c_dim, int n_leaf, vector<Point> ps);
     ~KDTree();
-    void split(int cur_dim);
     void insert(Point p);
     vector<Point> range_query(HRect& rect);
     Point point_query(Point& p);
